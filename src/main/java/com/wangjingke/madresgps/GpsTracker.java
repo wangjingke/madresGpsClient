@@ -32,7 +32,7 @@ public class GpsTracker extends Service {
         {
             mLastLocation = new Location(provider);
             try {
-                Outlet.writeToCsv("LocationListener", provider);
+                Outlet.writeToCsv("LocationListener", new String[]{provider});
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -48,7 +48,7 @@ public class GpsTracker extends Service {
         public void onProviderDisabled(String provider)
         {
             try {
-                Outlet.writeToCsv("ProviderDisabled", provider);
+                Outlet.writeToCsv("ProviderDisabled", new String[]{provider});
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -58,7 +58,7 @@ public class GpsTracker extends Service {
         public void onProviderEnabled(String provider)
         {
             try {
-                Outlet.writeToCsv("ProviderEnabled", provider);
+                Outlet.writeToCsv("ProviderEnabled", new String[]{provider});
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -100,7 +100,8 @@ public class GpsTracker extends Service {
 
             if (gps_enabled) gpsLoc=mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (network_enabled) netLoc=mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
+            /*
+            // choose to use the lasted location from gps or network
             if (gpsLoc!=null && netLoc!=null){
                 if (gpsLoc.getTime()>=netLoc.getTime()) {
                     lastLoc=gpsLoc;
@@ -119,6 +120,23 @@ public class GpsTracker extends Service {
                     e.printStackTrace();
                 }
             }
+            */
+            // record the lastest locations from both gps and network if possible
+            if (gpsLoc!=null) {
+                try {
+                    Outlet.writeToCsv("LocationTracking", new String[]{Encryption.encode(gpsLoc.toString()), String.valueOf(gpsLoc.getTime()), String.valueOf(gpsLoc.getSpeed()), String.valueOf(gpsLoc.getExtras())});
+                } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (netLoc!=null) {
+                try {
+                    Outlet.writeToCsv("LocationTracking", new String[]{Encryption.encode(netLoc.toString())});
+                } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
+                    e.printStackTrace();
+                }
+            }
+
 
             handler.postDelayed(periodicUpdate, 1000*10);
         }
@@ -128,7 +146,7 @@ public class GpsTracker extends Service {
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         try {
-            Outlet.writeToCsv("StartCommand", "Start");
+            Outlet.writeToCsv("StartCommand", new String[]{"Start"});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -140,7 +158,7 @@ public class GpsTracker extends Service {
     @Override
     public void onCreate() {
         try {
-            Outlet.writeToCsv("Create", "ServiceCreated");
+            Outlet.writeToCsv("Create", new String[]{"ServiceCreated"});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -152,13 +170,13 @@ public class GpsTracker extends Service {
                     mLocationListeners[1]);
         } catch (java.lang.SecurityException ex) {
             try {
-                Outlet.writeToCsv("Error", "fail to request location update");
+                Outlet.writeToCsv("Error", new String[]{"fail to request location update"});
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } catch (IllegalArgumentException ex) {
             try {
-                Outlet.writeToCsv("Error", "network provider does not exist");
+                Outlet.writeToCsv("Error", new String[]{"network provider does not exist"});
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -169,13 +187,13 @@ public class GpsTracker extends Service {
                     mLocationListeners[0]);
         } catch (java.lang.SecurityException ex) {
             try {
-                Outlet.writeToCsv("Error", "fail to request location update");
+                Outlet.writeToCsv("Error", new String[]{"fail to request location update"});
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } catch (IllegalArgumentException ex) {
             try {
-                Outlet.writeToCsv("Error", "gps provider does not exist");
+                Outlet.writeToCsv("Error", new String[]{"gps provider does not exist"});
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -186,7 +204,7 @@ public class GpsTracker extends Service {
     public void onDestroy()
     {
         try {
-            Outlet.writeToCsv("Destroy", "ServiceDestroyed");
+            Outlet.writeToCsv("Destroy", new String[]{"ServiceDestroyed"});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -201,7 +219,7 @@ public class GpsTracker extends Service {
                     mLocationManager.removeUpdates(mLocationListeners[i]);
                 } catch (Exception ex) {
                     try {
-                        Outlet.writeToCsv("Error", "fail to remove location listeners");
+                        Outlet.writeToCsv("Error", new String[]{"fail to remove location listeners"});
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -215,7 +233,7 @@ public class GpsTracker extends Service {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }
         try {
-            Outlet.writeToCsv("Initialize", "initializeLocationManager");
+            Outlet.writeToCsv("Initialize", new String[]{"initializeLocationManager"});
         } catch (IOException e) {
             e.printStackTrace();
         }

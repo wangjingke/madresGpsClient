@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.opencsv.CSVWriter;
 
@@ -15,7 +17,7 @@ public class Outlet {
     public static String filePathGPS = baseDir + File.separator + fileNameGPS;
     public static File recordGPS = new File(filePathGPS);
 
-    public static void writeToCsv(String prefix, String text) throws IOException {
+    public static void writeToCsv(String prefix, String[] text) throws IOException {
         Date timestamp = new Date();
 
         CSVWriter writer;
@@ -27,9 +29,16 @@ public class Outlet {
         else {
             writer = new CSVWriter(new FileWriter(filePathGPS));
         }
-        String[] data = {prefix, text, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(timestamp)};
 
-        writer.writeNext(data);
+        List<String> data = new ArrayList<String>();
+        data.add(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(timestamp));
+        data.add(prefix);
+        for (String element : text) {
+            data.add(element);
+        }
+        // String[] data = {new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(timestamp), prefix, text};
+
+        writer.writeNext(data.toArray(new String[0]));
         writer.close();
     }
 
