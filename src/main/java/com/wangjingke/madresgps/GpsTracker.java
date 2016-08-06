@@ -3,6 +3,8 @@ package com.wangjingke.madresgps;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.location.GpsSatellite;
+import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
@@ -67,13 +69,7 @@ public class GpsTracker extends Service {
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras)
         {
-            /*
-            try {
-                Outlet.writeToCsv("StatusChanged", provider);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            */
+            //Outlet.writeToCsv("StatusChanged", provider);
         }
     }
 
@@ -92,53 +88,45 @@ public class GpsTracker extends Service {
     private Runnable periodicUpdate = new Runnable() {
         @Override
         public void run() {
-            Location gpsLoc=null, netLoc=null, lastLoc=null;
-            boolean gps_enabled=false, network_enabled=false;
+            Location gpsLoc=null, netLoc=null;
 
-            gps_enabled=mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            network_enabled=mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            boolean gps_enabled=mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean network_enabled=mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-            if (gps_enabled) gpsLoc=mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            int satInView = 0;
+            int satInUse = 0;
+            if (gps_enabled) {
+                gpsLoc=mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                Iterable<GpsSatellite> satellites = mLocationManager.getGpsStatus(null).getSatellites();
+                if (satellites != null) {
+                    for (GpsSatellite sat : satellites) {
+                        satInView++;
+                        if (sat.usedInFix()) {
+                            satInUse++;
+                        }
+                    }
+                }
+            }
             if (network_enabled) netLoc=mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            /*
-            // choose to use the lasted location from gps or network
-            if (gpsLoc!=null && netLoc!=null){
-                if (gpsLoc.getTime()>=netLoc.getTime()) {
-                    lastLoc=gpsLoc;
-                } else {
-                    lastLoc=netLoc;
-                }
-            }
 
-            if (gpsLoc!=null && netLoc==null) {lastLoc=gpsLoc;}
-            if (gpsLoc==null && netLoc!=null) {lastLoc=netLoc;}
-
-            if (lastLoc!=null) {
-                try {
-                    Outlet.writeToCsv("LocationTracking", Encryption.encode(lastLoc.toString()));
-                } catch (IOException | NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-                    e.printStackTrace();
-                }
-            }
-            */
             // record the lastest locations from both gps and network if possible
             if (gpsLoc!=null) {
                 try {
-                    Outlet.writeToCsv("LocationTracking", new String[]{Encryption.encode(gpsLoc.toString()), String.valueOf(gpsLoc.getTime()), String.valueOf(gpsLoc.getSpeed()), String.valueOf(gpsLoc.getExtras())});
+                    Outlet.writeToCsv("LocationTracking", new String[]{Encryption.encode(gpsLoc.toString()), String.valueOf(gpsLoc.getTime()), String.valueOf(satInUse), String.valueOf(satInView)});
                 } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
                     e.printStackTrace();
                 }
             }
             if (netLoc!=null) {
                 try {
-                    Outlet.writeToCsv("LocationTracking", new String[]{Encryption.encode(netLoc.toString())});
+                    Outlet.writeToCsv("LocationTracking", new String[]{Encryption.encode(netLoc.toString()), String.valueOf(netLoc.getTime()), CheckNetwork.checkWifi(GpsTracker.this)});
                 } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
                     e.printStackTrace();
                 }
             }
 
-
-            handler.postDelayed(periodicUpdate, 1000*10);
+            handler.postDelayed(periodicUpdate, 1000*10); //recode every 10 sec
         }
     };
 
@@ -162,12 +150,11 @@ public class GpsTracker extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        handler.post(periodicUpdate);
         initializeLocationManager();
+        handler.post(periodicUpdate);
+
         try {
-            mLocationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
-                    mLocationListeners[1]);
+            mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE, mLocationListeners[1]);
         } catch (java.lang.SecurityException ex) {
             try {
                 Outlet.writeToCsv("Error", new String[]{"fail to request location update"});
@@ -182,9 +169,7 @@ public class GpsTracker extends Service {
             }
         }
         try {
-            mLocationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
-                    mLocationListeners[0]);
+            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE, mLocationListeners[0]);
         } catch (java.lang.SecurityException ex) {
             try {
                 Outlet.writeToCsv("Error", new String[]{"fail to request location update"});
@@ -203,14 +188,12 @@ public class GpsTracker extends Service {
     @Override
     public void onDestroy()
     {
+        super.onDestroy();
         try {
             Outlet.writeToCsv("Destroy", new String[]{"ServiceDestroyed"});
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-        super.onDestroy();
         if (mLocationManager != null) {
             handler.removeCallbacks(periodicUpdate);
             for (int i = 0; i < mLocationListeners.length; i++) {
@@ -229,13 +212,21 @@ public class GpsTracker extends Service {
     }
 
     private void initializeLocationManager() {
+        GpsListener checkSatellite = new GpsListener();
         if (mLocationManager == null) {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            mLocationManager.addGpsStatusListener(checkSatellite);
         }
         try {
             Outlet.writeToCsv("Initialize", new String[]{"initializeLocationManager"});
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    class GpsListener implements GpsStatus.Listener {
+        @Override
+        public void onGpsStatusChanged(int event) {
         }
     }
 

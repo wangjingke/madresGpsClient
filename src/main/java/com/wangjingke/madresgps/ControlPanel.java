@@ -61,7 +61,7 @@ public class ControlPanel extends Activity {
                     editor.putString("MadresStatus", "OFF");
                     editor.apply();
                     try {
-                        Outlet.writeToCsv("stopStudy", "studyStopped");
+                        Outlet.writeToCsv("stopStudy", new String[]{"studyStopped"});
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -89,7 +89,7 @@ public class ControlPanel extends Activity {
                         startService(new Intent(ControlPanel.this, GpsTracker.class));
 
                         try {
-                            Outlet.writeToCsv("subjectID", CheckID.extractID(input));
+                            Outlet.writeToCsv("subjectID", new String[]{CheckID.extractID(input)});
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

@@ -36,8 +36,6 @@ public class Outlet {
         for (String element : text) {
             data.add(element);
         }
-        // String[] data = {new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(timestamp), prefix, text};
-
         writer.writeNext(data.toArray(new String[0]));
         writer.close();
     }
