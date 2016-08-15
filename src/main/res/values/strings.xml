@@ -2,6 +2,56 @@
     <string name="app_name">MadresGPS</string>
     <string name="subjectID">Participant ID</string>
     <string name="confirmButton">Confirm</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="currentID">com.wangjingke.MadresGPS.currentID</string>
+    <string name="aboutButton">About this App</string>
+    <string name="title_activity_about_this_app">About This App</string>
+    <string name="aboutThisAppText">
+
+        <![CDATA[
+            <b>"Welcome to the MADRES study!"</b><br/>
+            <p></p>
+            The Maternal and Developmental Risks from Environmental and Social Stressors (MADRES)
+            study is trying to determine the pre- and postpartum environmental exposures as well
+            as psychological stress and behavioral risk factors that affect childhood obesity.<br/>
+            <p></p>
+            This madresGPS app tracks the geographic location of the device during study period. All
+            the records are encrypted using the AES algorithm and stored solely on the phone. No personal
+            information will be shared with a third party. There will be no leak of sensible information
+            when the phone is lost.
+            <p></p>
+            If you have any questions, please feel free to contact me
+            at <a href="mailto:kwangjing@gmx.com">kwangjing@gmx.com</a>
+            <p></p>
+            Special thanks to the folks who created the Java <a href="http://opencsv.sf.net">Opencsv</a>
+            library that makes parsing csv files such a breeze. The Opencsv library is liscenced
+            under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2 liscence</a>.
+            <p></p>
+            Details on the app, as well as the source code can be found
+            <a href="https://github.com/wangjingke/madresGpsClient">here</a> on GitHub.
+            The app and all its related materials are licensed under the MIT license:
+            <p></p>
+            madresGPS
+            <p></p>
+            Copyright © 2016 Wangjing Ke. All rights reserved.
+            <p></p>
+            Permission is hereby granted, free of charge, to any person obtaining a copy of this
+            software and associated documentation files (the "Software"), to deal in the Software
+            without restriction, including without limitation the rights to use, copy, modify,
+            merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+            permit persons to whom the Software is furnished to do so, subject to the following
+            conditions:
+            <p></p>
+            The above copyright notice and this permission notice shall be included in all
+            copies or substantial portions of the Software.
+            <p></p>
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+            INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+            PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+            FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+            OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+            DEALINGS IN THE SOFTWARE.
+            <p></p>
+        ]]>
+
+    </string>
+    <string name="action_settings">Settings</string>
 </resources>

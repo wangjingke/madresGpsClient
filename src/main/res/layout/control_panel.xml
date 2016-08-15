@@ -32,7 +32,20 @@
         android:layout_below="@+id/confirmButton"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        android:id="@+id/aboutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        style="?android:attr/borderlessButtonStyle"
+        android:text="@string/aboutButton"
+        android:textAllCaps="false"
+        android:textSize="18dp"
+        android:textColor="#0000FF"
+        android:onClick="sendMessage"
         />
 
 </RelativeLayout>

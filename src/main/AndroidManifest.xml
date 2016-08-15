@@ -30,8 +30,7 @@
         <service
             android:name=".GpsTracker"
             android:enabled="true"
-            android:exported="true">
-        </service>
+            android:exported="true"></service>
 
         <receiver android:name=".BootReceiver">
             <intent-filter>
@@ -39,6 +38,10 @@
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".AboutThisApp"
+            android:label="@string/title_activity_about_this_app"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

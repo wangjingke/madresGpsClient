@@ -104,4 +104,9 @@ public class ControlPanel extends Activity {
             }
         });
     }
+
+    public void sendMessage(View view) {
+        Intent intent = new Intent(this, AboutThisApp.class);
+        startActivity(intent);
+    }
 }
