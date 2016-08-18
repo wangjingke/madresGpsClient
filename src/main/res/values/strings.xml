@@ -4,6 +4,7 @@
     <string name="confirmButton">Confirm</string>
     <string name="aboutButton">About this App</string>
     <string name="title_activity_about_this_app">About This App</string>
+    <string name="action_settings">Settings</string>
     <string name="aboutThisAppText">
 
         <![CDATA[
@@ -53,5 +54,4 @@
         ]]>
 
     </string>
-    <string name="action_settings">Settings</string>
 </resources>
