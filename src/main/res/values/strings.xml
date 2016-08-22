@@ -10,16 +10,11 @@
         <![CDATA[
             <b>"Welcome to the MADRES study!"</b><br/>
             <p></p>
-            The Maternal and Developmental Risks from Environmental and Social Stressors (MADRES)
-            study is trying to determine the pre- and postpartum environmental exposures as well
-            as psychological stress and behavioral risk factors that affect childhood obesity.<br/>
+            All the location data recorded by the app are encrypted using the AES algorithm and
+            stored solely on the phone. No personal information will be shared with a third party.
+            There will be no leak of sensible information when the phone is lost.
             <p></p>
-            This madresGPS app tracks the geographic location of the device during study period. All
-            the records are encrypted using the AES algorithm and stored solely on the phone. No personal
-            information will be shared with a third party. There will be no leak of sensible information
-            when the phone is lost.
-            <p></p>
-            If you have any questions, please feel free to contact me
+            If you have any questions about the app, please feel free to contact me
             at <a href="mailto:kwangjing@gmx.com">kwangjing@gmx.com</a>
             <p></p>
             Special thanks to the folks who created the Java <a href="http://opencsv.sf.net">Opencsv</a>
