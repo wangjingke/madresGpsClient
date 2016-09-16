@@ -8,7 +8,7 @@
     <string name="aboutThisAppText">
 
         <![CDATA[
-            <b>"Welcome to the MADRES study!"</b><br/>
+            <b>"Hello there!"</b><br/>
             <p></p>
             All the location data recorded by the app are encrypted using the AES algorithm and
             stored solely on the phone. No personal information will be shared with a third party.

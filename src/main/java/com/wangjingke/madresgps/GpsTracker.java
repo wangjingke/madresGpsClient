@@ -1,8 +1,12 @@
 package com.wangjingke.madresgps;
 
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.GpsSatellite;
 import android.location.GpsStatus;
 import android.location.Location;
@@ -10,11 +14,14 @@ import android.location.LocationManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -23,7 +30,7 @@ import javax.crypto.NoSuchPaddingException;
 public class GpsTracker extends Service {
 
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000*5;
+    private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 0f;
 
     private class LocationListener implements android.location.LocationListener
@@ -88,45 +95,57 @@ public class GpsTracker extends Service {
     private Runnable periodicUpdate = new Runnable() {
         @Override
         public void run() {
-            Location gpsLoc=null, netLoc=null;
+            // record the lastest locations from both gps and network if possible
+            long current = System.currentTimeMillis();
+            if ((current-current%1000)%(1000*10)  == 0) { //record every 10 sec
+                Location gpsLoc=null, netLoc=null;
 
-            boolean gps_enabled=mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            boolean network_enabled=mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                boolean gps_enabled=mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                boolean network_enabled=mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
-            int satInView = 0;
-            int satInUse = 0;
-            if (gps_enabled) {
-                gpsLoc=mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                int satInView = 0;
+                int satInUse = 0;
+                if (gps_enabled) {
+                    gpsLoc=mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-                Iterable<GpsSatellite> satellites = mLocationManager.getGpsStatus(null).getSatellites();
-                if (satellites != null) {
-                    for (GpsSatellite sat : satellites) {
-                        satInView++;
-                        if (sat.usedInFix()) {
-                            satInUse++;
+                    Iterable<GpsSatellite> satellites = mLocationManager.getGpsStatus(null).getSatellites();
+                    if (satellites != null) {
+                        for (GpsSatellite sat : satellites) {
+                            satInView++;
+                            if (sat.usedInFix()) {
+                                satInUse++;
+                            }
                         }
                     }
                 }
-            }
-            if (network_enabled) netLoc=mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                if (network_enabled) netLoc=mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-            // record the lastest locations from both gps and network if possible
-            if (gpsLoc!=null) {
-                try {
-                    Outlet.writeToCsv("Tracking", new String[]{Encryption.encode(gpsLoc.toString()), String.valueOf(gpsLoc.getTime()), String.valueOf(satInUse), String.valueOf(satInView)});
-                } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
-                    e.printStackTrace();
+                if (gpsLoc!=null) {
+                    try {
+                        Outlet.writeToCsv("Tracking", new String[]{Encryption.encode(gpsLoc.toString()), String.valueOf(gpsLoc.getTime()), String.valueOf(satInUse), String.valueOf(satInView)});
+                    } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (netLoc!=null) {
+                    try {
+                        Outlet.writeToCsv("Tracking", new String[]{Encryption.encode(netLoc.toString()), String.valueOf(netLoc.getTime()), CheckNetwork.checkWifi(GpsTracker.this)});
+                    } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-            if (netLoc!=null) {
-                try {
-                    Outlet.writeToCsv("Tracking", new String[]{Encryption.encode(netLoc.toString()), String.valueOf(netLoc.getTime()), CheckNetwork.checkWifi(GpsTracker.this)});
-                } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
-                    e.printStackTrace();
-                }
-            }
 
-            handler.postDelayed(periodicUpdate, 1000*10); //recode every 10 sec
+            // alarm fires off every sec to keep the phone awake
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.add(Calendar.MILLISECOND, 1000);
+            Intent notificationIntent = new Intent(GpsTracker.this, GpsTracker.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(GpsTracker.this, 0, notificationIntent, 0);
+            AlarmManager keepAwake = (AlarmManager) getSystemService(ALARM_SERVICE);
+            keepAwake.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+
+            handler.postDelayed(periodicUpdate, 1000);
         }
     };
 
@@ -139,7 +158,27 @@ public class GpsTracker extends Service {
             e.printStackTrace();
         }
         super.onStartCommand(intent, flags, startId);
-
+        /*
+        // initiate wake lock to keep device awake
+        PowerManager powerManager = (PowerManager) getSystemService(GpsTracker.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag");
+        wakeLock.acquire();
+        */
+        /*
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+        builder.setContentTitle("madresGPS running ...");
+        builder.setSmallIcon(R.drawable.ic_android_black_24dp);
+        startForeground(337, builder.build());
+        */
+        // show notification on screen and run the service on foreground to avoid standby
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GpsTracker.this);
+        String madresID = preferences.getString("MadresID", "");
+        Notification notification = new NotificationCompat.Builder(this)
+                .setContentTitle(madresID + ", thank you!")
+                .setOngoing(true)
+                .setSmallIcon(R.drawable.ic_android_black_24dp)
+                .build();
+        startForeground(337,  notification);
         return START_STICKY;
     }
 
