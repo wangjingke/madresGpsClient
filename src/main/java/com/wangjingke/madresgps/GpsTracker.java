@@ -17,7 +17,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
-
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -30,7 +29,7 @@ import javax.crypto.NoSuchPaddingException;
 public class GpsTracker extends Service {
 
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000;
+    private static final int LOCATION_INTERVAL = 1000*3;
     private static final float LOCATION_DISTANCE = 0f;
 
     private class LocationListener implements android.location.LocationListener
@@ -129,7 +128,7 @@ public class GpsTracker extends Service {
                 }
                 if (netLoc!=null) {
                     try {
-                        Outlet.writeToCsv("Tracking", new String[]{Encryption.encode(netLoc.toString()), String.valueOf(netLoc.getTime()), CheckNetwork.checkWifi(GpsTracker.this)});
+                        Outlet.writeToCsv("Tracking", new String[]{Encryption.encode(netLoc.toString()), String.valueOf(netLoc.getTime()), CheckNetwork.checkWifi(GpsTracker.this), CheckNetwork.checkNetwork(GpsTracker.this)});
                     } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
                         e.printStackTrace();
                     }
@@ -158,18 +157,7 @@ public class GpsTracker extends Service {
             e.printStackTrace();
         }
         super.onStartCommand(intent, flags, startId);
-        /*
-        // initiate wake lock to keep device awake
-        PowerManager powerManager = (PowerManager) getSystemService(GpsTracker.POWER_SERVICE);
-        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "wakelockTag");
-        wakeLock.acquire();
-        */
-        /*
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
-        builder.setContentTitle("madresGPS running ...");
-        builder.setSmallIcon(R.drawable.ic_android_black_24dp);
-        startForeground(337, builder.build());
-        */
+
         // show notification on screen and run the service on foreground to avoid standby
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GpsTracker.this);
         String madresID = preferences.getString("MadresID", "");
@@ -190,8 +178,6 @@ public class GpsTracker extends Service {
             e.printStackTrace();
         }
         initializeLocationManager();
-        handler.post(periodicUpdate);
-
         try {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE, mLocationListeners[1]);
         } catch (java.lang.SecurityException ex) {
@@ -222,6 +208,8 @@ public class GpsTracker extends Service {
                 e.printStackTrace();
             }
         }
+
+        handler.post(periodicUpdate);
     }
 
     @Override

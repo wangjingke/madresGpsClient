@@ -61,7 +61,7 @@ public class ControlPanel extends Activity {
                     editor.putString("MadresStatus", "OFF");
                     editor.apply();
                     try {
-                        Outlet.writeToCsv("stopStudy", new String[]{"studyStopped"});
+                        Outlet.writeToCsv("StopStudy", new String[]{"studyStopped"});
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -77,7 +77,7 @@ public class ControlPanel extends Activity {
                     notice.setText("The study is over, and the GPS tracking is terminated.");
                 } else if (CheckID.start(input)) {
                     if (CheckID.extractID(input).equals("invalid ID")) {
-                        notice.setText("invalid ID, try again");
+                        notice.setText("Invalid ID, try again");
                     } else {
                         // write subjectID and status to shared preference
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ControlPanel.this);
@@ -89,7 +89,7 @@ public class ControlPanel extends Activity {
                         startService(new Intent(ControlPanel.this, GpsTracker.class));
 
                         try {
-                            Outlet.writeToCsv("subjectID", new String[]{CheckID.extractID(input)});
+                            Outlet.writeToCsv("SubjectID", new String[]{CheckID.extractID(input)});
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
