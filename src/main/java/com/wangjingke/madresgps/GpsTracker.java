@@ -20,7 +20,6 @@ import android.support.v4.app.NotificationCompat;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Calendar;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -31,6 +30,8 @@ public class GpsTracker extends Service {
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL = 1000*3;
     private static final float LOCATION_DISTANCE = 0f;
+    private static final int refresh_interval = 1000*2;
+    //private static final int record_interval = 1000*10;
 
     private class LocationListener implements android.location.LocationListener
     {
@@ -91,21 +92,35 @@ public class GpsTracker extends Service {
     }
 
     Handler handler = new Handler();
+    //public long lastTime = 0; //counter of sec intervals just in case the system time jumps a sec
+    public int counter = 0;
     private Runnable periodicUpdate = new Runnable() {
         @Override
         public void run() {
-            // record the lastest locations from both gps and network if possible
+            counter++;
             long current = System.currentTimeMillis();
-            if ((current-current%1000)%(1000*10)  == 0) { //record every 10 sec
-                Location gpsLoc=null, netLoc=null;
+            long alarmTime = (current - current%1000) + refresh_interval;
+            // alarm fires off every sec to keep the phone awake
+            Intent notificationIntent = new Intent(GpsTracker.this, GpsTracker.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(GpsTracker.this, 0, notificationIntent, 0);
+            AlarmManager keepAwake = (AlarmManager) getSystemService(ALARM_SERVICE);
+            keepAwake.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
 
-                boolean gps_enabled=mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                boolean network_enabled=mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            handler.postDelayed(periodicUpdate, alarmTime - current);
+
+            // record the latest locations from both gps and network if possible
+            if (counter>=5/*current >= lastTime + record_interval - 1000 || current < lastTime*/) { //record every 10 sec
+                //lastTime = current - current%1000;
+                counter = 0;
+                Location gpsLoc = null, netLoc = null;
+
+                boolean gps_enabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                boolean network_enabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
                 int satInView = 0;
                 int satInUse = 0;
                 if (gps_enabled) {
-                    gpsLoc=mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    gpsLoc = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
                     Iterable<GpsSatellite> satellites = mLocationManager.getGpsStatus(null).getSatellites();
                     if (satellites != null) {
@@ -117,16 +132,16 @@ public class GpsTracker extends Service {
                         }
                     }
                 }
-                if (network_enabled) netLoc=mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                if (network_enabled) netLoc = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-                if (gpsLoc!=null) {
+                if (gpsLoc != null) {
                     try {
                         Outlet.writeToCsv("Tracking", new String[]{Encryption.encode(gpsLoc.toString()), String.valueOf(gpsLoc.getTime()), String.valueOf(satInUse), String.valueOf(satInView)});
                     } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
                         e.printStackTrace();
                     }
                 }
-                if (netLoc!=null) {
+                if (netLoc != null) {
                     try {
                         Outlet.writeToCsv("Tracking", new String[]{Encryption.encode(netLoc.toString()), String.valueOf(netLoc.getTime()), CheckNetwork.checkWifi(GpsTracker.this), CheckNetwork.checkNetwork(GpsTracker.this)});
                     } catch (IOException | NoSuchPaddingException | InvalidKeyException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException e) {
@@ -134,17 +149,6 @@ public class GpsTracker extends Service {
                     }
                 }
             }
-
-            // alarm fires off every sec to keep the phone awake
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.add(Calendar.MILLISECOND, 1000);
-            Intent notificationIntent = new Intent(GpsTracker.this, GpsTracker.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(GpsTracker.this, 0, notificationIntent, 0);
-            AlarmManager keepAwake = (AlarmManager) getSystemService(ALARM_SERVICE);
-            keepAwake.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-
-            handler.postDelayed(periodicUpdate, 1000);
         }
     };
 
@@ -221,6 +225,8 @@ public class GpsTracker extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        AlarmManager goToSleep = (AlarmManager) getSystemService(ALARM_SERVICE);
+        goToSleep.cancel(PendingIntent.getActivity(GpsTracker.this, 0, new Intent(GpsTracker.this, GpsTracker.class), 0));
         if (mLocationManager != null) {
             handler.removeCallbacks(periodicUpdate);
             for (int i = 0; i < mLocationListeners.length; i++) {
@@ -245,7 +251,7 @@ public class GpsTracker extends Service {
             mLocationManager.addGpsStatusListener(checkSatellite);
         }
         try {
-            Outlet.writeToCsv("Initialize", new String[]{"initializeLocationManager"});
+            Outlet.writeToCsv("Initialize", new String[]{"InitializeLocationManager"});
         } catch (IOException e) {
             e.printStackTrace();
         }
