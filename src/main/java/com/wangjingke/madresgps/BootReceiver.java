@@ -15,7 +15,7 @@ public class BootReceiver extends BroadcastReceiver {
         String status = preferences.getString("MadresStatus", "");
 
         if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction()) && status.equalsIgnoreCase("ON")) {
-            Intent pushIntent = new Intent(context, GpsTracker.class);
+            Intent pushIntent = new Intent(context, GpsTrackerAlarm.class);
             context.startService(pushIntent);
         }
     }

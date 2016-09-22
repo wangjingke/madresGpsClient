@@ -29,7 +29,12 @@
         </activity>
 
         <service
-            android:name=".GpsTracker"
+            android:name=".GpsTrackerAlarm"
+            android:enabled="true"
+            android:exported="true"></service>
+        <service android:name=".GpsTrackerAlarmRecorder"></service>
+        <service
+            android:name=".GpsTrackerWakelock"
             android:enabled="true"
             android:exported="true"></service>
 
@@ -38,6 +43,8 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <receiver android:name=".GpsTrackerAlarmTrigger"></receiver>
 
         <activity
             android:name=".AboutThisApp"

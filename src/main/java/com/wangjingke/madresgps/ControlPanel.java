@@ -55,7 +55,7 @@ public class ControlPanel extends Activity {
                 String input = subjectID.getText().toString();
 
                 if (CheckID.stop(input)) {
-                    stopService(new Intent(ControlPanel.this, GpsTracker.class));
+                    stopService(new Intent(ControlPanel.this, GpsTrackerAlarm.class));
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ControlPanel.this);
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putString("MadresStatus", "OFF");
@@ -86,7 +86,7 @@ public class ControlPanel extends Activity {
                         editor.putString("MadresStatus", "ON");
                         editor.apply();
                         // start service
-                        startService(new Intent(ControlPanel.this, GpsTracker.class));
+                        startService(new Intent(ControlPanel.this, GpsTrackerAlarm.class));
 
                         try {
                             Outlet.writeToCsv("SubjectID", new String[]{CheckID.extractID(input)});
