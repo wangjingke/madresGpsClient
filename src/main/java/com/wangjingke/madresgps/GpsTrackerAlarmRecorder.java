@@ -6,6 +6,8 @@ import android.location.GpsSatellite;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
+import android.os.SystemClock;
+import android.util.Log;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -28,6 +30,7 @@ public class GpsTrackerAlarmRecorder extends IntentService {
         Runnable periodicUpdate = new Runnable() {
             @Override
             public void run() {
+                Log.i("recorder", "receiveAlarm"+ SystemClock.elapsedRealtime());
                 // record the latest locations from both gps and network if possible
                 Location gpsLoc = null, netLoc = null;
 

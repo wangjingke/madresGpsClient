@@ -1,8 +1,10 @@
 <resources>
     <string name="app_name">MadresGPS</string>
-    <string name="subjectID">Participant ID</string>
+    <string name="subjectID">Hi, how can I help you?</string>
     <string name="confirmButton">Confirm</string>
     <string name="aboutButton">About this App</string>
+    <string name="modeWakeLock">Wake Lock</string>
+    <string name="modeWakeTimer">Wake Timer</string>
     <string name="title_activity_about_this_app">About This App</string>
     <string name="action_settings">Settings</string>
     <string name="aboutThisAppText">

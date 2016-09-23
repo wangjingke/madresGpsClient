@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.os.Environment;
 
@@ -51,11 +53,14 @@ public class ControlPanel extends Activity {
             public void onClick(View view) {
                 EditText subjectID = (EditText) findViewById(R.id.subjectID);
                 TextView notice = (TextView) findViewById(R.id.startNotice);
+                RadioGroup mode = (RadioGroup) findViewById(R.id.radioMode);
 
                 String input = subjectID.getText().toString();
+                subjectID.setText(""); // clean the input text
 
                 if (CheckID.stop(input)) {
                     stopService(new Intent(ControlPanel.this, GpsTrackerAlarm.class));
+                    stopService(new Intent(ControlPanel.this, GpsTrackerWakelock.class));
                     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ControlPanel.this);
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putString("MadresStatus", "OFF");
@@ -85,19 +90,35 @@ public class ControlPanel extends Activity {
                         editor.putString("MadresID", CheckID.extractID(input));
                         editor.putString("MadresStatus", "ON");
                         editor.apply();
+                        // write selected mode to shared preference
+                        int modeId = mode.getCheckedRadioButtonId();
+                        RadioButton chosenMode = (RadioButton) findViewById(modeId);
+                        editor.putString("MadresMode", chosenMode.getText().toString());
+                        editor.apply();
                         // start service
-                        startService(new Intent(ControlPanel.this, GpsTrackerAlarm.class));
-
-                        try {
-                            Outlet.writeToCsv("SubjectID", new String[]{CheckID.extractID(input)});
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (chosenMode.getText().toString().equals("Wake Timer")) {
+                            stopService(new Intent(ControlPanel.this, GpsTrackerWakelock.class));
+                            startService(new Intent(ControlPanel.this, GpsTrackerAlarm.class));
+                            try {
+                                Outlet.writeToCsv("SubjectID", new String[]{CheckID.extractID(input)});
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            notice.setText("The participant ID is set as " + CheckID.extractID(input) + ", and the study is running.");
+                        } else if (chosenMode.getText().toString().equals("Wake Lock")){
+                            stopService(new Intent(ControlPanel.this, GpsTrackerAlarm.class));
+                            startService(new Intent(ControlPanel.this, GpsTrackerWakelock.class));
+                            try {
+                                Outlet.writeToCsv("SubjectID", new String[]{CheckID.extractID(input)});
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            notice.setText("The participant ID is set as " + CheckID.extractID(input) + ", and the study is running.");
                         }
-                        notice.setText("The participant ID is set as " + CheckID.extractID(input) + ", and the study is running.");
                     }
                 } else if (CheckID.clean(input)) {
                     Outlet.delete();
-                    notice.setText("The stored data is wiped clean");
+                    notice.setText("All the stored data are wiped clean");
                 } else {
                     notice.setText("Invalid input");
                 }

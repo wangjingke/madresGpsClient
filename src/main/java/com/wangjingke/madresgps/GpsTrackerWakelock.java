@@ -82,7 +82,7 @@ public class GpsTrackerWakelock extends Service {
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         try {
-            Outlet.writeToCsv("StartCommand", new String[]{"Start"});
+            Outlet.writeToCsv("StartCommand", new String[]{"Start under Wake Lock mode"});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,8 +91,10 @@ public class GpsTrackerWakelock extends Service {
         // show notification on screen and run the service on foreground to avoid standby
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GpsTrackerWakelock.this);
         String madresID = preferences.getString("MadresID", "");
+        String mode = preferences.getString("MadresMode", "");
         Notification notification = new NotificationCompat.Builder(this)
                 .setContentTitle(madresID + ", thank you!")
+                .setContentText(mode + " mode")
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_android_black_24dp)
                 .build();

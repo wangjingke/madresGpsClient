@@ -13,9 +13,14 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String status = preferences.getString("MadresStatus", "");
-
+        String mode = preferences.getString("MadresMode", "");
+        Intent pushIntent = null;
         if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction()) && status.equalsIgnoreCase("ON")) {
-            Intent pushIntent = new Intent(context, GpsTrackerAlarm.class);
+            if (mode.equalsIgnoreCase("Wake Lock")) {
+                pushIntent = new Intent(context, GpsTrackerWakelock.class);
+            } else if (mode.equalsIgnoreCase("Wake Timer")) {
+                pushIntent = new Intent(context, GpsTrackerAlarm.class);
+            }
             context.startService(pushIntent);
         }
     }

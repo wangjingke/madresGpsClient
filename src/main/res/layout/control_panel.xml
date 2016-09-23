@@ -11,22 +11,51 @@
 
     <EditText
         android:id="@+id/subjectID"
+        android:layout_marginTop="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="@string/subjectID"
         android:inputType="text"/>
 
+    <RadioGroup
+        android:id="@+id/radioMode"
+        android:layout_below="@+id/subjectID"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <RadioButton
+            android:checked="true"
+            android:id="@+id/radioAlarm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/modeWakeTimer" />
+
+        <RadioButton
+            android:id="@+id/radioLock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/modeWakeLock" />
+
+    </RadioGroup>
+
     <Button
         android:id="@+id/confirmButton"
         android:layout_width="wrap_content"
+        android:minWidth="120dp"
         android:layout_height="wrap_content"
         android:text="@string/confirmButton"
-        android:layout_below="@+id/subjectID"
+        android:layout_below="@+id/radioMode"
+        android:layout_marginTop="18dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <TextView
         android:id="@+id/startNotice"
+        android:layout_marginTop="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/confirmButton"
