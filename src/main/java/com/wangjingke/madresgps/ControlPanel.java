@@ -66,7 +66,7 @@ public class ControlPanel extends Activity {
                     editor.putString("MadresStatus", "OFF");
                     editor.apply();
                     try {
-                        Outlet.writeToCsv("StopStudy", new String[]{"studyStopped"});
+                        Outlet.writeToCsv("StopStudy", new String[]{"StudyStopped"});
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
