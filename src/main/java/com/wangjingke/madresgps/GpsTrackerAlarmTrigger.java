@@ -22,16 +22,16 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 public class GpsTrackerAlarmTrigger extends WakefulBroadcastReceiver {
-    private static final int refresh_interval = 1000*10;
+
     @Override
     public void onReceive (final Context context, Intent intent) {
         // Intent service = new Intent(context, GpsTrackerAlarmRecorder.class);
         // startWakefulService(context, service);
+        scheduleExactAlarm(context, (AlarmManager)context.getSystemService(Context.ALARM_SERVICE), intent.getIntExtra("interval", 10));
+
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GpsTrackerWakelock");
         wl.acquire();
-
-        scheduleExactAlarm(context, (AlarmManager)context.getSystemService(Context.ALARM_SERVICE));
 
         Handler handler = new Handler();
         Runnable periodicUpdate = new Runnable() {
@@ -83,11 +83,13 @@ public class GpsTrackerAlarmTrigger extends WakefulBroadcastReceiver {
         wl.release();
     }
 
-    public static void scheduleExactAlarm(Context context, AlarmManager alarms) {
-        Intent i=new Intent(context, GpsTrackerAlarmTrigger.class);
+    public static void scheduleExactAlarm(Context context, AlarmManager alarms, int interval) {
+        int refresh_interval = interval;
+
+        Intent i=new Intent(context, GpsTrackerAlarmTrigger.class).putExtra("interval", refresh_interval);
         PendingIntent pi=PendingIntent.getBroadcast(context, 0, i, 0);
         //Log.i("trigger", "setAlarm @ "+SystemClock.elapsedRealtime());
-        alarms.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+refresh_interval-SystemClock.elapsedRealtime()%1000, pi);
+        alarms.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+refresh_interval*1000-SystemClock.elapsedRealtime()%1000, pi);
     }
 
     public static void cancelAlarm(Context context, AlarmManager alarms) {

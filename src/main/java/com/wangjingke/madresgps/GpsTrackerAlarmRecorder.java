@@ -18,7 +18,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 
-
 public class GpsTrackerAlarmRecorder extends IntentService {
     public GpsTrackerAlarmRecorder() {
         super("GpsTrackerAlarmRecorder");

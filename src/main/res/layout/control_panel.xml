@@ -54,6 +54,36 @@
         android:layout_alignParentStart="true" />
 
     <TextView
+        android:id="@+id/sec"
+        android:layout_below="@+id/subjectID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/radioMode"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="32dp"
+        android:layout_marginRight="12dp"
+        android:text="s intervals"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <EditText
+        android:id="@+id/interval"
+        android:layout_toLeftOf="@+id/sec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/sec"
+        android:text="10"
+        android:inputType="number"/>
+
+    <TextView
+        android:layout_toLeftOf="@+id/interval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/interval"
+        android:text="With"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
         android:id="@+id/startNotice"
         android:layout_marginTop="12dp"
         android:layout_width="wrap_content"

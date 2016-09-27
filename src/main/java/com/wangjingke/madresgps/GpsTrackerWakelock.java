@@ -1,6 +1,5 @@
 package com.wangjingke.madresgps;
 
-import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -11,11 +10,9 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -28,15 +25,15 @@ import javax.crypto.NoSuchPaddingException;
 public class GpsTrackerWakelock extends Service {
 
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000*3;
     private static final float LOCATION_DISTANCE = 0f;
-    private static final int refresh_interval = 1000*10;
+    private int LOCATION_INTERVAL;
+    private int refresh_interval;
 
     Handler handler = new Handler();
     private Runnable periodicUpdate = new Runnable() {
         @Override
         public void run() {
-            handler.postDelayed(periodicUpdate, refresh_interval - SystemClock.elapsedRealtime()%1000);
+            handler.postDelayed(periodicUpdate, refresh_interval*1000 - SystemClock.elapsedRealtime()%1000);
             // record the latest locations from both gps and network if possible
             Location gpsLoc = null, netLoc = null;
 
@@ -89,16 +86,8 @@ public class GpsTrackerWakelock extends Service {
         super.onStartCommand(intent, flags, startId);
 
         // show notification on screen and run the service on foreground to avoid standby
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GpsTrackerWakelock.this);
-        String madresID = preferences.getString("MadresID", "");
-        String mode = preferences.getString("MadresMode", "");
-        Notification notification = new NotificationCompat.Builder(this)
-                .setContentTitle(madresID + ", thank you!")
-                .setContentText(mode + " mode")
-                .setOngoing(true)
-                .setSmallIcon(R.drawable.ic_android_black_24dp)
-                .build();
-        startForeground(337,  notification);
+        startForeground(337, ForegroundNotification.run(this));
+        handler.post(periodicUpdate);
         return START_STICKY;
     }
 
@@ -111,6 +100,10 @@ public class GpsTrackerWakelock extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(GpsTrackerWakelock.this);
+        refresh_interval = preferences.getInt("MadresInterval", 10);
+        LOCATION_INTERVAL = 1000*(refresh_interval-refresh_interval%3)/3;
+
         initializeLocationManager();
         try {
             mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE, mLocationListeners[1]);
@@ -146,7 +139,6 @@ public class GpsTrackerWakelock extends Service {
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GpsTrackerWakelock");
         wl.acquire();
-        handler.post(periodicUpdate);
     }
 
     @Override
@@ -199,53 +191,6 @@ public class GpsTrackerWakelock extends Service {
             new LocationListener(LocationManager.GPS_PROVIDER),
             new LocationListener(LocationManager.NETWORK_PROVIDER)
     };
-
-    private class LocationListener implements android.location.LocationListener
-    {
-        Location mLastLocation;
-
-        public LocationListener(String provider)
-        {
-            mLastLocation = new Location(provider);
-            try {
-                Outlet.writeToCsv("LocationListener", new String[]{provider});
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onLocationChanged(Location location)
-        {
-            mLastLocation.set(location);
-        }
-
-        @Override
-        public void onProviderDisabled(String provider)
-        {
-            try {
-                Outlet.writeToCsv("ProviderDisabled", new String[]{provider});
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onProviderEnabled(String provider)
-        {
-            try {
-                Outlet.writeToCsv("ProviderEnabled", new String[]{provider});
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras)
-        {
-            //Outlet.writeToCsv("StatusChanged", provider);
-        }
-    }
 
     @Override
     public IBinder onBind(Intent arg0)

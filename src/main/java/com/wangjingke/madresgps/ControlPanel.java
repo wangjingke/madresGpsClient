@@ -54,6 +54,7 @@ public class ControlPanel extends Activity {
                 EditText subjectID = (EditText) findViewById(R.id.subjectID);
                 TextView notice = (TextView) findViewById(R.id.startNotice);
                 RadioGroup mode = (RadioGroup) findViewById(R.id.radioMode);
+                EditText interval = (EditText) findViewById(R.id.interval);
 
                 String input = subjectID.getText().toString();
                 subjectID.setText(""); // clean the input text
@@ -84,12 +85,12 @@ public class ControlPanel extends Activity {
                     if (CheckID.extractID(input).equals("invalid ID")) {
                         notice.setText("Invalid ID, try again");
                     } else {
-                        // write subjectID and status to shared preference
+                        // write subjectID, status, and mode to shared preference
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(ControlPanel.this);
                         SharedPreferences.Editor editor = preferences.edit();
                         editor.putString("MadresID", CheckID.extractID(input));
                         editor.putString("MadresStatus", "ON");
-                        editor.apply();
+                        editor.putInt("MadresInterval", Integer.valueOf(interval.getText().toString()));
                         // write selected mode to shared preference
                         int modeId = mode.getCheckedRadioButtonId();
                         RadioButton chosenMode = (RadioButton) findViewById(modeId);
