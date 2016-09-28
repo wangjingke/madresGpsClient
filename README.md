@@ -11,3 +11,5 @@ This is the source code of the location tracking app [madresGPS](https://play.go
     * the wake timer mode uses a combination of `AlarmManager` and `BroadcastReceiver` to wake up the phone regularly and record the location. This mode generates relatively constant recording with trivial variation in intervals, and it is much more battery friendly.
 * Customizable recording intervals
 * The recording will pause when the phone is powered off, but it will resume after the phone is on again.
+
+More details about the code can be found in [this post](http://wangjingke.com/2016/09/23/Multiple-ways-to-schedule-repeated-tasks-in-android).

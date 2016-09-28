@@ -1,5 +1,7 @@
 package com.wangjingke.madresgps;
 
+import android.os.SystemClock;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -41,7 +43,7 @@ public class Outlet {
     }
 
     public static void renameCsv(String subjectID) {
-        String dataGPSpath = baseDir + File.separator + "MadresGpsTracking_" + subjectID + ".csv";
+        String dataGPSpath = baseDir + File.separator + "MadresGpsTracking_" + subjectID + "_" + System.currentTimeMillis() + ".csv";
         File dataGPS = new File(dataGPSpath);
         recordGPS.renameTo(dataGPS);
     }
