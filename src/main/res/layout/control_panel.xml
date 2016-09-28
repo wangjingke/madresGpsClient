@@ -102,7 +102,7 @@
         style="?android:attr/borderlessButtonStyle"
         android:text="@string/aboutButton"
         android:textAllCaps="false"
-        android:textSize="18dp"
+        android:textSize="18sp"
         android:textColor="#0000FF"
         android:onClick="sendMessage"
         />

@@ -2,6 +2,7 @@ package com.wangjingke.madresgps;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.GpsSatellite;
@@ -10,7 +11,6 @@ import android.location.LocationManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
 import java.io.IOException;
@@ -21,12 +21,11 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-public class GpsTrackerAlarmTrigger extends WakefulBroadcastReceiver {
+public class GpsTrackerAlarmTrigger extends BroadcastReceiver {
 
     @Override
     public void onReceive (final Context context, Intent intent) {
-        // Intent service = new Intent(context, GpsTrackerAlarmRecorder.class);
-        // startWakefulService(context, service);
+        Log.i("record", "receive @ "+SystemClock.elapsedRealtime());
         scheduleExactAlarm(context, (AlarmManager)context.getSystemService(Context.ALARM_SERVICE), intent.getIntExtra("interval", 10));
 
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -37,7 +36,7 @@ public class GpsTrackerAlarmTrigger extends WakefulBroadcastReceiver {
         Runnable periodicUpdate = new Runnable() {
             @Override
             public void run() {
-                //Log.i("recorder", "receiveAlarm"+ SystemClock.elapsedRealtime());
+                Log.i("record", "run @ "+SystemClock.elapsedRealtime());
                 // record the latest locations from both gps and network if possible
                 Location gpsLoc = null, netLoc = null;
 
@@ -85,10 +84,9 @@ public class GpsTrackerAlarmTrigger extends WakefulBroadcastReceiver {
 
     public static void scheduleExactAlarm(Context context, AlarmManager alarms, int interval) {
         int refresh_interval = interval;
-
         Intent i=new Intent(context, GpsTrackerAlarmTrigger.class).putExtra("interval", refresh_interval);
         PendingIntent pi=PendingIntent.getBroadcast(context, 0, i, 0);
-        //Log.i("trigger", "setAlarm @ "+SystemClock.elapsedRealtime());
+        Log.i("time", String.valueOf(SystemClock.elapsedRealtime()+refresh_interval*1000-SystemClock.elapsedRealtime()%1000));
         alarms.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+refresh_interval*1000-SystemClock.elapsedRealtime()%1000, pi);
     }
 

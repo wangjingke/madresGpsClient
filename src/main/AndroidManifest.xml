@@ -23,7 +23,6 @@
         <activity android:name=".ControlPanel">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -31,24 +30,23 @@
         <service
             android:name=".GpsTrackerAlarm"
             android:enabled="true"
-            android:exported="true"></service>
-        <service android:name=".GpsTrackerAlarmRecorder"></service>
+            android:exported="true" />
         <service
             android:name=".GpsTrackerWakelock"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <receiver android:name=".BootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".GpsTrackerAlarmTrigger"></receiver>
+        <receiver android:name=".GpsTrackerAlarmTrigger" />
 
         <activity
             android:name=".AboutThisApp"
             android:label="@string/title_activity_about_this_app"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
