@@ -9,9 +9,7 @@ import android.location.GpsSatellite;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -25,18 +23,12 @@ public class GpsTrackerAlarmTrigger extends BroadcastReceiver {
 
     @Override
     public void onReceive (final Context context, Intent intent) {
-        Log.i("record", "receive @ "+SystemClock.elapsedRealtime());
         scheduleExactAlarm(context, (AlarmManager)context.getSystemService(Context.ALARM_SERVICE), intent.getIntExtra("interval", 10));
-
-        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-        PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "GpsTrackerWakelock");
-        wl.acquire();
 
         Handler handler = new Handler();
         Runnable periodicUpdate = new Runnable() {
             @Override
             public void run() {
-                Log.i("record", "run @ "+SystemClock.elapsedRealtime());
                 // record the latest locations from both gps and network if possible
                 Location gpsLoc = null, netLoc = null;
 
@@ -79,20 +71,18 @@ public class GpsTrackerAlarmTrigger extends BroadcastReceiver {
         };
 
         handler.post(periodicUpdate);
-        wl.release();
     }
 
     public static void scheduleExactAlarm(Context context, AlarmManager alarms, int interval) {
         int refresh_interval = interval;
-        Intent i=new Intent(context, GpsTrackerAlarmTrigger.class).putExtra("interval", refresh_interval);
-        PendingIntent pi=PendingIntent.getBroadcast(context, 0, i, 0);
-        Log.i("time", String.valueOf(SystemClock.elapsedRealtime()+refresh_interval*1000-SystemClock.elapsedRealtime()%1000));
+        Intent i = new Intent(context, GpsTrackerAlarmTrigger.class).putExtra("interval", refresh_interval);
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
         alarms.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+refresh_interval*1000-SystemClock.elapsedRealtime()%1000, pi);
     }
 
     public static void cancelAlarm(Context context, AlarmManager alarms) {
-        Intent i=new Intent(context, GpsTrackerAlarmTrigger.class);
-        PendingIntent pi=PendingIntent.getBroadcast(context, 0, i, 0);
+        Intent i = new Intent(context, GpsTrackerAlarmTrigger.class);
+        PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
         alarms.cancel(pi);
     }
 }

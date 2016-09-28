@@ -28,7 +28,6 @@ public class GpsTrackerAlarm extends Service {
             e.printStackTrace();
         }
         super.onStartCommand(intent, flags, startId);
-
         // show notification on screen and run the service on foreground to avoid standby
         startForeground(337,  ForegroundNotification.run(this));
 
