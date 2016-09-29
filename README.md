@@ -1,4 +1,6 @@
 # madresGpsClient
+Illustration and discussion on the usage of the app can be found [here](http://wangjingke.com/2016/09/29/Illustration-and-discussion-of-the-MadresGPS-app).
+
 This is the source code of the location tracking app [madresGPS](https://play.google.com/store/apps/details?id=com.wangjingke.madresgps). It is specially designed for the USC [MADRES](http://madrescenter.blogspot.com/) study with a few special features.
 * The location data is encrypted with the AES algorithm according to IRB requirements, so no sensible personal information will be leaked when the phone gets lost. The decryption of data can be easily implemented in all sorts of platforms, like [this one](http://wangjingke.com/madresGpsDecryption/index.html) in javascript, and [this one](https://github.com/wangjingke/madresGpsProcess) in java.
 * Participant ID will be shown as a notification on the phone all the time, and the results will be renamed with the participant ID once the recording is over.
